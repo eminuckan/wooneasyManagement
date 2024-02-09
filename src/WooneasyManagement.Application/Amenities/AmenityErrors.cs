@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
+using WooneasyManagement.Application.Common;
 
-namespace WooneasyManagement.Application.Common.Errors;
+namespace WooneasyManagement.Application.Amenities;
 
 public static class AmenityErrors
 {

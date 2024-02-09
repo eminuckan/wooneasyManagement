@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WooneasyManagement.Application\WooneasyManagement.Application.csproj" />
+    <ProjectReference Include="..\WooneasyManagement.Infrastructure\WooneasyManagement.Infrastructure.csproj" />
     <ProjectReference Include="..\WooneasyManagement.Persistence\WooneasyManagement.Persistence.csproj" />
   </ItemGroup>
 

@@ -6,7 +6,7 @@ namespace WooneasyManagement.Domain.Entities
     public abstract class Amenity : BaseEntity
     {
         public required string Title { get; set; }
-        public string? IconClass { get; set; }
+        public required string IconClass { get; set; }
     }
 
     public class PropertyAmenity : Amenity

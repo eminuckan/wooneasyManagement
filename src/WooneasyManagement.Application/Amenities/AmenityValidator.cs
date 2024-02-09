@@ -35,4 +35,15 @@ namespace WooneasyManagement.Application.Amenities
         }
     }
 
+    public class AmenityUpdateValidator : AbstractValidator<UpdateAmenityCommand>
+    {
+        public AmenityUpdateValidator()
+        {
+            RuleFor(a => a.IconClass)
+                .MaximumLength(50);
+            RuleFor(a => a.Title)
+                .MaximumLength(200);
+        }
+    }
+
 }

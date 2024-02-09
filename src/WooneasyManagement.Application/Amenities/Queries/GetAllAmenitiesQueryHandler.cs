@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using WooneasyManagement.Application.Amenities.Dtos;
 using WooneasyManagement.Application.Common;
 using WooneasyManagement.Application.Common.Data;
 using WooneasyManagement.Domain.Enums;

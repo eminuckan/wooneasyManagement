@@ -1,6 +1,6 @@
 ﻿using WooneasyManagement.Domain.Enums;
 
-namespace WooneasyManagement.Application.Amenities;
+namespace WooneasyManagement.Application.Amenities.Dtos;
 
 public record AmenityCreateDto
 {

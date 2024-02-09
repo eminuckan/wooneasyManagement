@@ -5,10 +5,9 @@ using WooneasyManagement.Application.Amenities.Queries;
 using WooneasyManagement.Application.Common;
 using WooneasyManagement.Domain.Enums;
 
-
 namespace WooneasyManagement.API.Endpoints;
 
-public class PropertyAmenityEndpoints : ICarterModule
+public class AmenityEndpoints : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
@@ -20,7 +19,7 @@ public class PropertyAmenityEndpoints : ICarterModule
 
         group.MapGet("{id}", GetAmenity).WithName(nameof(GetAmenity));
 
-        //group.MapPut("{id}", UpdatePropertyAmenity).WithName(nameof(UpdatePropertyAmenity));
+        group.MapPut("{id}", UpdateAmenity).WithName(nameof(UpdateAmenity));
 
         group.MapDelete("{id}", DeleteAmenity).WithName(nameof(DeleteAmenity));
     }
@@ -40,7 +39,7 @@ public class PropertyAmenityEndpoints : ICarterModule
         AmenityType? amenityType
     )
     {
-        var response = await sender.Send(new GetAllAmenitiesQuery(){AmenityType = amenityType});
+        var response = await sender.Send(new GetAllAmenitiesQuery { AmenityType = amenityType });
 
         return response.IsSuccess ? Results.Ok(response.Data) : response.ToProblemDetails();
     }
@@ -50,7 +49,7 @@ public class PropertyAmenityEndpoints : ICarterModule
         Guid id
     )
     {
-        var response = await sender.Send(new GetAmenityQuery() { PropertyAmenityId = id });
+        var response = await sender.Send(new GetAmenityQuery { PropertyAmenityId = id });
 
         return response.IsSuccess ? Results.Ok(response.Data) : response.ToProblemDetails();
     }
@@ -60,8 +59,20 @@ public class PropertyAmenityEndpoints : ICarterModule
         Guid id
     )
     {
-        var response = await sender.Send(new DeleteAmenityCommand(){Id = id});
+        var response = await sender.Send(new DeleteAmenityCommand { Id = id });
 
         return response.IsSuccess ? Results.NoContent() : response.ToProblemDetails();
+    }
+
+    public static async Task<IResult> UpdateAmenity(
+        ISender sender,
+        Guid id,
+        UpdateAmenityCommand request
+    )
+    {
+        request.Id = id;
+        var response = await sender.Send(request);
+
+        return response.IsSuccess ? Results.Ok() : response.ToProblemDetails();
     }
 }

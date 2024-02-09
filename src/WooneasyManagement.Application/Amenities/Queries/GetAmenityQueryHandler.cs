@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using MediatR;
+using WooneasyManagement.Application.Amenities.Dtos;
 using WooneasyManagement.Application.Common;
 using WooneasyManagement.Application.Common.Data;
-using WooneasyManagement.Application.Common.Errors;
 
 namespace WooneasyManagement.Application.Amenities.Queries
 {

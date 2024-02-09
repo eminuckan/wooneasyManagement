@@ -18,4 +18,8 @@
     <ProjectReference Include="..\WooneasyManagement.Domain\WooneasyManagement.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Cities\Queries\" />
+  </ItemGroup>
+
 </Project>
