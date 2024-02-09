@@ -22,7 +22,7 @@ public class PropertyAmenityEndpoints : ICarterModule
 
         //group.MapPut("{id}", UpdatePropertyAmenity).WithName(nameof(UpdatePropertyAmenity));
 
-        //group.MapDelete("{id}", DeletePropertyAmenity).WithName(nameof(DeletePropertyAmenity));
+        group.MapDelete("{id}", DeleteAmenity).WithName(nameof(DeleteAmenity));
     }
 
     public static async Task<IResult> CreateAmenity(
@@ -53,5 +53,15 @@ public class PropertyAmenityEndpoints : ICarterModule
         var response = await sender.Send(new GetAmenityQuery() { PropertyAmenityId = id });
 
         return response.IsSuccess ? Results.Ok(response.Data) : response.ToProblemDetails();
+    }
+
+    public static async Task<IResult> DeleteAmenity(
+        ISender sender,
+        Guid id
+    )
+    {
+        var response = await sender.Send(new DeleteAmenityCommand(){Id = id});
+
+        return response.IsSuccess ? Results.NoContent() : response.ToProblemDetails();
     }
 }
