@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.S3" Version="3.7.305.24" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\WooneasyManagement.Application\WooneasyManagement.Application.csproj" />
   </ItemGroup>
 

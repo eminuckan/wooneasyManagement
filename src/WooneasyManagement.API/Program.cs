@@ -16,7 +16,7 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices();
 builder.Services.AddPersistenceServices(builder.Configuration);
 
-builder.Services.AddStorage<LocalStorage>();
+builder.Services.AddStorage<AmazonS3Storage>();
 
 builder.Services.AddAuthorization();
 builder.Services.AddCarter();

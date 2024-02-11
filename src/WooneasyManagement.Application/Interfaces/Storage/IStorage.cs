@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Http;
+using WooneasyManagement.Application.Common.Dtos;
 
 namespace WooneasyManagement.Application.Interfaces.Storage;
 
 public interface IStorage
 {
-    Task<List<(string fileName, string destination)>> UploadAsync(string destination, IFormFileCollection files);
-    Task DeleteAsync(string destination, string fileName);
-    List<string> GetFiles(string destination);
-    bool HasFile(string destination, string fileName);
+    Task<List<FileInfoDto>> UploadAsync(string destination, string? path,
+        IFormFileCollection files);
+
+    Task DeleteAsync(string destination, string? path, string fileName);
+    Task<List<FileInfoDto>> GetFiles(string destination, string? path);
+    Task<bool> HasFile(string destination, string? path, string fileName);
 }

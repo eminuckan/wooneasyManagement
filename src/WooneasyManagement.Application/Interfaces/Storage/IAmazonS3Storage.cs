@@ -1,5 +1,5 @@
 ﻿namespace WooneasyManagement.Application.Interfaces.Storage;
 
-public interface IAzureStorage : IStorage
+public interface IAmazonS3Storage : IStorage
 {
 }

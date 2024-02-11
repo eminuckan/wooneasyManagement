@@ -1,56 +1,73 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
+using WooneasyManagement.Application.Common.Dtos;
 using WooneasyManagement.Application.Interfaces.Storage;
 
-namespace WooneasyManagement.Infrastructure.Services.Storage
+namespace WooneasyManagement.Infrastructure.Services.Storage;
+
+public class LocalStorage(IWebHostEnvironment webHostEnvironment) : ILocalStorage
 {
-    public class LocalStorage(IWebHostEnvironment webHostEnvironment) : ILocalStorage
+    public async Task<List<FileInfoDto>> UploadAsync(string destination,
+        string? path, IFormFileCollection files)
     {
-        public async Task<List<(string fileName, string destination)>> UploadAsync(string destination, IFormFileCollection files)
+        var uploadPath = Path.Combine(webHostEnvironment.WebRootPath, destination, path);
+        if (!Directory.Exists(uploadPath))
+            Directory.CreateDirectory(uploadPath);
+
+        List<FileInfoDto> values = new();
+        foreach (var file in files)
         {
-            string uploadPath = Path.Combine(webHostEnvironment.WebRootPath, destination);
-            if (!Directory.Exists(uploadPath))
-                Directory.CreateDirectory(uploadPath);
-
-            List<(string fileName, string destination)> values = new();
-            foreach (IFormFile file in files)
+            string fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            await CopyFileAsync(Path.Combine(uploadPath, fileName), file);
+            values.Add(new FileInfoDto()
             {
-                string fileName = "new-file" + Path.GetExtension(file.FileName);
-                await CopyFileAsync(Path.Combine(uploadPath, fileName), file);
-                values.Add((fileName, uploadPath));
-
-            }
-
-            return values;
+                FileName = fileName,
+                Path = path,
+                BucketOrMainDirectory = destination
+            });
         }
 
-        public async Task DeleteAsync(string destination, string fileName)
-            => File.Delete($"{destination}\\{fileName}");
+        return values;
+    }
 
-        public List<string> GetFiles(string destination)
+    public async Task DeleteAsync(string destination, string? path, string fileName)
+    {
+        string filePath = Path.Combine(webHostEnvironment.WebRootPath, destination, path, fileName);
+        File.Delete(filePath);
+    }
+
+    public async Task<List<FileInfoDto>> GetFiles(string destination, string? path)
+    {
+        DirectoryInfo directory = new(Path.Combine(webHostEnvironment.WebRootPath, destination, path));
+        List<FileInfoDto> files = directory.GetFiles().Select(f => new FileInfoDto
         {
-            DirectoryInfo directory = new (destination);
-            return directory.GetFiles().Select(f => f.Name).ToList();
+            FileName = f.Name,
+            Path = path,
+            BucketOrMainDirectory = destination
+        }).ToList();
+
+        return files;
+    }
+
+    public async Task<bool> HasFile(string destination, string? path, string fileName)
+    {
+        string filePath = Path.Combine(webHostEnvironment.WebRootPath, destination, path,fileName);
+        return File.Exists(filePath);
+    }
+
+    public async Task<bool> CopyFileAsync(string fullPath, IFormFile file)
+    {
+        try
+        {
+            await using FileStream fileStream = new(fullPath, FileMode.Create, FileAccess.Write, FileShare.None,
+                1024 * 1024, false);
+            await file.CopyToAsync(fileStream);
+            await fileStream.FlushAsync();
+            return true;
         }
-
-        public bool HasFile(string destination, string fileName)
-            => File.Exists($"{destination}\\{fileName}");
-
-        public async Task<bool> CopyFileAsync(string destination, IFormFile file)
+        catch (Exception ex)
         {
-            try
-            {
-                await using FileStream fileStream = new(destination, FileMode.Create, FileAccess.Write, FileShare.None,
-                    1024 * 1024, useAsync: false);
-                await file.CopyToAsync(fileStream);
-                await fileStream.FlushAsync();
-                return true;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            throw ex;
         }
     }
 }

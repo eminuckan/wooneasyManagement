@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using WooneasyManagement.Application.Common.Dtos;
 using WooneasyManagement.Application.Interfaces.Storage;
 
 namespace WooneasyManagement.Infrastructure.Services.Storage;
@@ -7,15 +8,16 @@ public class StorageService(IStorage storage) : IStorageService
 {
     public string StorageName => storage.GetType().Name;
 
-    public Task<List<(string fileName, string destination)>> UploadAsync(string destination, IFormFileCollection files)
-        => storage.UploadAsync(destination, files);
 
-    public Task DeleteAsync(string destination, string fileName)
-        => storage.DeleteAsync(destination, fileName);
+    public Task<List<FileInfoDto>> UploadAsync(string destination, string? path, IFormFileCollection files)
+        => storage.UploadAsync(destination, path, files);
 
-    public List<string> GetFiles(string destination)
-        => storage.GetFiles(destination);
+    public Task DeleteAsync(string destination, string? path, string fileName)
+        => storage.DeleteAsync(destination,path, fileName);
 
-    public bool HasFile(string destination, string fileName)
-        => storage.HasFile(destination, fileName);
+    public Task<List<FileInfoDto>> GetFiles(string destination, string? path)
+        => storage.GetFiles(destination,path);
+
+    public Task<bool> HasFile(string destination, string? path, string fileName)
+        => storage.HasFile(destination,path, fileName);
 }
