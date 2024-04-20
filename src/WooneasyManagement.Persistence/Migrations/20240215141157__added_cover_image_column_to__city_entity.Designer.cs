@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WooneasyManagement.Persistence.Contexts;
@@ -11,9 +12,11 @@ using WooneasyManagement.Persistence.Contexts;
 namespace WooneasyManagement.Persistence.Migrations
 {
     [DbContext(typeof(WooneasyManagementDbContext))]
-    partial class WooneasyManagementDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240215141157__added_cover_image_column_to__city_entity")]
+    partial class _added_cover_image_column_to__city_entity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

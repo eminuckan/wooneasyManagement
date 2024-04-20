@@ -1,4 +1,4 @@
-﻿namespace WooneasyManagement.Application.Interfaces.Storage;
+﻿namespace WooneasyManagement.Application.Common.Interfaces.Storage;
 
 public interface IStorageService : IStorage
 {

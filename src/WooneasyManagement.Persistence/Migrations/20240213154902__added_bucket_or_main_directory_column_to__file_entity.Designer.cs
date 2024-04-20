@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WooneasyManagement.Persistence.Contexts;
@@ -11,9 +12,11 @@ using WooneasyManagement.Persistence.Contexts;
 namespace WooneasyManagement.Persistence.Migrations
 {
     [DbContext(typeof(WooneasyManagementDbContext))]
-    partial class WooneasyManagementDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240213154902__added_bucket_or_main_directory_column_to__file_entity")]
+    partial class _added_bucket_or_main_directory_column_to__file_entity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -112,9 +115,6 @@ namespace WooneasyManagement.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("CoverImageId")
-                        .HasColumnType("uuid");
-
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -129,8 +129,6 @@ namespace WooneasyManagement.Persistence.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CoverImageId");
 
                     b.ToTable("Cities");
                 });
@@ -158,10 +156,6 @@ namespace WooneasyManagement.Persistence.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("FilePath")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Storage")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -433,15 +427,6 @@ namespace WooneasyManagement.Persistence.Migrations
                         .HasForeignKey("UnitsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("WooneasyManagement.Domain.Entities.City", b =>
-                {
-                    b.HasOne("WooneasyManagement.Domain.Entities.CityImageFile", "CoverImage")
-                        .WithMany()
-                        .HasForeignKey("CoverImageId");
-
-                    b.Navigation("CoverImage");
                 });
 
             modelBuilder.Entity("WooneasyManagement.Domain.Entities.Property", b =>

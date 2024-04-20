@@ -10,5 +10,7 @@ namespace WooneasyManagement.Domain.Entities
         public string? State { get; set; }
 
         public required string Country { get; set; }
+
+        public CityImageFile? CoverImage { get; set; }
     }
 }

@@ -21,12 +21,12 @@ namespace WooneasyManagement.Application.Amenities.Queries
 
             if (queryResult is null)
             {
-                return Result.Failure(AmenityErrors.AmenityNotFound);
+                return Result.Fail(AmenityErrors.AmenityNotFound);
             }
 
-            var amenity = mapper.Map<AmenityViewDto>(queryResult);
+            AmenityViewDto amenity = mapper.Map<AmenityViewDto>(queryResult);
 
-            return Result.Success().WithData(amenity);
+            return Result<AmenityViewDto>.Ok(amenity);
         }
     }
 }

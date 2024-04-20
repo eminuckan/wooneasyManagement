@@ -1,16 +1,21 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using WooneasyManagement.Application.Common.Dtos;
-using WooneasyManagement.Application.Interfaces.Storage;
+using WooneasyManagement.Application.Common.Interfaces.Storage;
+using WooneasyManagement.Application.Files;
 
 namespace WooneasyManagement.Infrastructure.Services.Storage;
 
 public class LocalStorage(IWebHostEnvironment webHostEnvironment) : ILocalStorage
 {
-    public async Task<List<FileInfoDto>> UploadAsync(string destination,
-        string? path, IFormFileCollection files)
+    public Task<FileInfoDto> UploadAsync(string bucketOrMainDirectory, string path, IFormFile file)
     {
-        var uploadPath = Path.Combine(webHostEnvironment.WebRootPath, destination, path);
+        throw new NotImplementedException();
+    }
+
+    public async Task<List<FileInfoDto>> UploadAsync(string bucketOrMainDirectory,
+        string path, IFormFileCollection files)
+    {
+        var uploadPath = Path.Combine(webHostEnvironment.WebRootPath, bucketOrMainDirectory, path);
         if (!Directory.Exists(uploadPath))
             Directory.CreateDirectory(uploadPath);
 
@@ -22,36 +27,46 @@ public class LocalStorage(IWebHostEnvironment webHostEnvironment) : ILocalStorag
             values.Add(new FileInfoDto()
             {
                 FileName = fileName,
-                Path = path,
-                BucketOrMainDirectory = destination
+                FilePath = String.IsNullOrEmpty(path) ? "/" : path,
+                BucketOrMainDirectory = bucketOrMainDirectory,
+                Storage = typeof(LocalStorage).ToString()
             });
         }
 
         return values;
     }
 
-    public async Task DeleteAsync(string destination, string? path, string fileName)
+    public async Task DeleteAsync(string bucketOrMainDirectory, string path, string fileName)
     {
-        string filePath = Path.Combine(webHostEnvironment.WebRootPath, destination, path, fileName);
+        string filePath = Path.Combine(webHostEnvironment.WebRootPath, bucketOrMainDirectory, path, fileName);
         File.Delete(filePath);
     }
 
-    public async Task<List<FileInfoDto>> GetFiles(string destination, string? path)
+    public async Task DeleteAsync(string bucketOrMainDirectory, string path, List<string> fileNames)
     {
-        DirectoryInfo directory = new(Path.Combine(webHostEnvironment.WebRootPath, destination, path));
+        foreach (var fileName in fileNames)
+        {
+            await DeleteAsync(bucketOrMainDirectory, path, fileName);
+        }
+    }
+
+    public async Task<List<FileInfoDto>> GetFiles(string bucketOrMainDirectory, string path)
+    {
+        DirectoryInfo directory = new(Path.Combine(webHostEnvironment.WebRootPath, bucketOrMainDirectory, path));
         List<FileInfoDto> files = directory.GetFiles().Select(f => new FileInfoDto
         {
             FileName = f.Name,
-            Path = path,
-            BucketOrMainDirectory = destination
+            FilePath = String.IsNullOrEmpty(path) ? "/" : path,
+            BucketOrMainDirectory = bucketOrMainDirectory,
+            Storage = typeof(LocalStorage).ToString()
         }).ToList();
 
         return files;
     }
 
-    public async Task<bool> HasFile(string destination, string? path, string fileName)
+    public async Task<bool> HasFile(string bucketOrMainDirectory, string path, string fileName)
     {
-        string filePath = Path.Combine(webHostEnvironment.WebRootPath, destination, path,fileName);
+        string filePath = Path.Combine(webHostEnvironment.WebRootPath, bucketOrMainDirectory, path,fileName);
         return File.Exists(filePath);
     }
 

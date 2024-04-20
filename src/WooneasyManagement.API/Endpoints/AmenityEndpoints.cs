@@ -31,7 +31,7 @@ public class AmenityEndpoints : ICarterModule
     {
         var response = await sender.Send(request);
 
-        return response.IsSuccess ? Results.Created() : response.ToProblemDetails();
+        return response.ToMinimalAPIResult();
     }
 
     public static async Task<IResult> GetAmenities(
@@ -40,8 +40,7 @@ public class AmenityEndpoints : ICarterModule
     )
     {
         var response = await sender.Send(new GetAllAmenitiesQuery { AmenityType = amenityType });
-
-        return response.IsSuccess ? Results.Ok(response.Data) : response.ToProblemDetails();
+        return response.ToMinimalAPIResult();
     }
 
     public static async Task<IResult> GetAmenity(
@@ -51,7 +50,7 @@ public class AmenityEndpoints : ICarterModule
     {
         var response = await sender.Send(new GetAmenityQuery { PropertyAmenityId = id });
 
-        return response.IsSuccess ? Results.Ok(response.Data) : response.ToProblemDetails();
+        return response.ToMinimalAPIResult();
     }
 
     public static async Task<IResult> DeleteAmenity(
@@ -61,7 +60,7 @@ public class AmenityEndpoints : ICarterModule
     {
         var response = await sender.Send(new DeleteAmenityCommand { Id = id });
 
-        return response.IsSuccess ? Results.NoContent() : response.ToProblemDetails();
+        return response.ToMinimalAPIResult();
     }
 
     public static async Task<IResult> UpdateAmenity(
@@ -73,6 +72,6 @@ public class AmenityEndpoints : ICarterModule
         request.Id = id;
         var response = await sender.Send(request);
 
-        return response.IsSuccess ? Results.Ok() : response.ToProblemDetails();
+        return response.ToMinimalAPIResult();
     }
 }

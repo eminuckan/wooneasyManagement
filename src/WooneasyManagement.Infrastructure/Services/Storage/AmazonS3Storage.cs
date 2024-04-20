@@ -5,8 +5,8 @@ using Amazon.S3.Model;
 using Amazon.S3.Util;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using WooneasyManagement.Application.Common.Dtos;
-using WooneasyManagement.Application.Interfaces.Storage;
+using WooneasyManagement.Application.Common.Interfaces.Storage;
+using WooneasyManagement.Application.Files;
 
 namespace WooneasyManagement.Infrastructure.Services.Storage;
 
@@ -21,70 +21,69 @@ public class AmazonS3Storage : IAmazonS3Storage
         _client = new AmazonS3Client(accessKey, secretKey, RegionEndpoint.EUCentral1);
     }
 
-    public async Task<List<FileInfoDto>> UploadAsync(string destination, string? path, IFormFileCollection files)
+    public async Task<FileInfoDto> UploadAsync(string bucketOrMainDirectory, string path, IFormFile file)
     {
-        var bucketExists = await AmazonS3Util.DoesS3BucketExistV2Async(_client, destination);
+        await CreateBucketIfNotExistsAsync(bucketOrMainDirectory);
 
-        if (!bucketExists)
-            try
+        var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+        var uploadRequest = new PutObjectRequest
+        {
+            BucketName = bucketOrMainDirectory,
+            Key = string.IsNullOrEmpty(path) ? fileName : $"{path}/{fileName}",
+            InputStream = file.OpenReadStream(),
+            ContentType = file.ContentType
+        };
+
+        var response = await _client.PutObjectAsync(uploadRequest);
+
+        if (response.HttpStatusCode == HttpStatusCode.OK)
+            return new FileInfoDto
             {
-                var bucketRequest = new PutBucketRequest
-                {
-                    BucketName = destination,
-                    UseClientRegion = true
-                };
+                FileName = fileName,
+                FilePath = String.IsNullOrEmpty(path) ? "/" : path,
+                BucketOrMainDirectory = bucketOrMainDirectory,
+                Storage = typeof(AmazonS3Storage).ToString()
+            };
 
+        throw new AmazonS3Exception($"Could not upload {fileName} to {bucketOrMainDirectory}.");
+    }
 
-                await _client.PutBucketAsync(bucketRequest);
-            }
-            catch (AmazonS3Exception e)
-            {
-                Console.WriteLine($"Error creating bucket: {e.Message}");
-                throw;
-            }
+    public async Task<List<FileInfoDto>> UploadAsync(string bucketOrMainDirectory, string path, IFormFileCollection files)
+    {
+        await CreateBucketIfNotExistsAsync(bucketOrMainDirectory);
 
         List<FileInfoDto> values = new();
         foreach (var file in files)
         {
-            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-            var uploadRequest = new PutObjectRequest
-            {
-                BucketName = destination,
-                Key = string.IsNullOrEmpty(path) ? fileName : $"{path}/{fileName}",
-                InputStream = file.OpenReadStream(),
-                ContentType = file.ContentType
-            };
-
-            var response = await _client.PutObjectAsync(uploadRequest);
-
-            if (response.HttpStatusCode == HttpStatusCode.OK)
-                values.Add(new FileInfoDto
-                {
-                    FileName = fileName,
-                    Path = path,
-                    BucketOrMainDirectory = destination
-                });
-            else
-                Console.WriteLine($"Could not upload {fileName} to {destination}.");
+            var fileInfo = await UploadAsync(bucketOrMainDirectory, path, file);
+            values.Add(fileInfo);
         }
 
         return values;
     }
 
-    public async Task DeleteAsync(string destination, string? path, string fileName)
+    public async Task DeleteAsync(string bucketOrMainDirectory, string path, string fileName)
     {
-        await EnsureBucketExistsAsync(destination);
+        await EnsureBucketExistsAsync(bucketOrMainDirectory);
 
-        await _client.DeleteObjectAsync(destination, string.IsNullOrEmpty(path) ? fileName : $"{path}/{fileName}");
+        await _client.DeleteObjectAsync(bucketOrMainDirectory, string.IsNullOrEmpty(path) ? fileName : $"{path}/{fileName}");
     }
 
-    public async Task<List<FileInfoDto>> GetFiles(string destination, string? path)
+    public async Task DeleteAsync(string bucketOrMainDirectory, string path, List<string> fileNames)
     {
-        await EnsureBucketExistsAsync(destination);
+        foreach (var fileName in fileNames)
+        {
+            await DeleteAsync(bucketOrMainDirectory, path, fileName);
+        }
+    }
+
+    public async Task<List<FileInfoDto>> GetFiles(string bucketOrMainDirectory, string path)
+    {
+        await EnsureBucketExistsAsync(bucketOrMainDirectory);
 
         var request = new ListObjectsV2Request
         {
-            BucketName = destination,
+            BucketName = bucketOrMainDirectory,
             MaxKeys = 50,
             Prefix = path
         };
@@ -96,19 +95,20 @@ public class AmazonS3Storage : IAmazonS3Storage
         {
             FileName = o.Key.Split("/").Last(),
             BucketOrMainDirectory = o.BucketName,
-            Path = path
+            FilePath = String.IsNullOrEmpty(path) ? "/" : path,
+            Storage = typeof(AmazonS3Storage).ToString()
         }).ToList();
 
         return files;
     }
 
-    public async  Task<bool> HasFile(string destination, string? path, string fileName)
+    public async  Task<bool> HasFile(string bucketOrMainDirectory, string path, string fileName)
     {
-        await EnsureBucketExistsAsync(destination);
+        await EnsureBucketExistsAsync(bucketOrMainDirectory);
 
         try
         {
-            var response = await _client.GetObjectMetadataAsync(destination,
+            var response = await _client.GetObjectMetadataAsync(bucketOrMainDirectory,
                 string.IsNullOrEmpty(path) ? fileName : $"{path}/{fileName}");
             return response.HttpStatusCode == HttpStatusCode.OK ;
         }
@@ -132,4 +132,21 @@ public class AmazonS3Storage : IAmazonS3Storage
             throw new AmazonS3Exception("Bucket not found");
         }
     }
+
+    private async Task CreateBucketIfNotExistsAsync(string bucketName)
+    {
+        var bucketExists = await AmazonS3Util.DoesS3BucketExistV2Async(_client, bucketName);
+
+        if (!bucketExists)
+        {
+            var bucketRequest = new PutBucketRequest
+            {
+                BucketName = bucketName,
+                UseClientRegion = true
+            };
+
+            await _client.PutBucketAsync(bucketRequest);
+        }
+    }
+
 }

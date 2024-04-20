@@ -1,5 +1,8 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using WooneasyManagement.Application.Cities.Commands;
+using WooneasyManagement.Application.Common.Validators;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace WooneasyManagement.Application.Cities
 {
@@ -19,4 +22,17 @@ namespace WooneasyManagement.Application.Cities
                 .MaximumLength(200);
         }
     }
+
+    public class CityCoverImageUploadValidator : AbstractValidator<UploadCityCoverImageCommand>
+    {
+        public CityCoverImageUploadValidator()
+        {
+            RuleFor(c => c.CityId)
+                .NotEmpty()
+                .NotNull();
+            RuleFor(c => c.File).SetValidator(new FileTypeValidator());
+            RuleFor(c => c.File).SetValidator(new FileSizeValidator());
+        }
+    }
+
 }

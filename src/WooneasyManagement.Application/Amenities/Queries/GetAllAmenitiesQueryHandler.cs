@@ -39,6 +39,6 @@ public class GetAllAmenitiesQueryHandler(IApplicationDbContext context, IMapper 
                 break;
         }
 
-        return Result.Success().WithData(amenities);
+        return Result<List<AmenityViewDto>>.Ok(amenities);
     }
 }

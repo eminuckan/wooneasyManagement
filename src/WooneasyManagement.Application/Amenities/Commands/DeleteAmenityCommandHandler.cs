@@ -21,12 +21,12 @@ namespace WooneasyManagement.Application.Amenities.Commands
             var amenity = await context.Amenities.FirstOrDefaultAsync(a => a.Id == request.Id, cancellationToken: cancellationToken);
             if (amenity is null)
             {
-                return Result.Failure(AmenityErrors.AmenityNotFound);
+                return Result.Fail(AmenityErrors.AmenityNotFound);
             }
 
             context.Amenities.Remove(amenity);
             await context.SaveChangesAsync(cancellationToken);
-            return Result.Success();
+            return Result.Ok();
         }
     }
 }

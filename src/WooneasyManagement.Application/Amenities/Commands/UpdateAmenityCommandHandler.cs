@@ -20,14 +20,14 @@ public class UpdateAmenityCommandHandler(IApplicationDbContext context) : IReque
 
         if (amenity is null)
         {
-            return Result.Failure(AmenityErrors.AmenityNotFound);
+            return Result.Fail(AmenityErrors.AmenityNotFound);
         }
 
         var existingAmenity = await context.Amenities.FirstOrDefaultAsync(a => a.Title == request.Title && a.Id != request.Id, cancellationToken);
 
         if (existingAmenity is not null)
         {
-            return Result.Failure(AmenityErrors.AmenityAlreadyExists);
+            return Result.Fail(AmenityErrors.AmenityAlreadyExists);
         }
 
         if (request.Title is not null || request.IconClass is not null)
@@ -39,6 +39,6 @@ public class UpdateAmenityCommandHandler(IApplicationDbContext context) : IReque
             await context.SaveChangesAsync(cancellationToken);
         }
         
-        return Result.Success();
+        return Result.Ok();
     }
 }

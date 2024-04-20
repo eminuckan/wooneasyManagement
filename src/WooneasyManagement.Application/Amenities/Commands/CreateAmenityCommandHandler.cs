@@ -2,7 +2,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using WooneasyManagement.Application.Amenities.Dtos;
-using WooneasyManagement.Application.Amenities.Helpers;
 using WooneasyManagement.Application.Amenities.Interfaces;
 using WooneasyManagement.Application.Common;
 using WooneasyManagement.Application.Common.Data;
@@ -24,7 +23,7 @@ public class CreateAmenityCommandHandler(IApplicationDbContext context, IMapper 
             await context.Amenities.FirstOrDefaultAsync(a => a.Title == request.Title, cancellationToken);
 
         
-        if (existingAmenity is not null) return Result.Failure(AmenityErrors.AmenityAlreadyExists);
+        if (existingAmenity is not null) return Result.Fail(AmenityErrors.AmenityAlreadyExists);
 
         
         switch (request.AmenityType)
@@ -39,10 +38,10 @@ public class CreateAmenityCommandHandler(IApplicationDbContext context, IMapper 
                 await amenityWriteService.AddAmenity<RoomAmenity>(mapper.Map<RoomAmenity>(request), cancellationToken);
                 break;
             default:
-                return Result.Failure(AmenityErrors.AmenityTypeInvalid);
+                return Result.Fail(AmenityErrors.AmenityTypeInvalid);
         }
 
         await context.SaveChangesAsync(cancellationToken);
-        return Result.Success();
+        return Result.Ok();
     }
 }
